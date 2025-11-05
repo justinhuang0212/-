@@ -4,8 +4,8 @@ const CONFIG = {
     API_MODEL: 'gpt-3.5-turbo',
     MAX_TOKENS: 1500,
     TEMPERATURE: 0.7,
-    // Line Login 設定（需要替換為實際的 LIFF ID）
-    LIFF_ID: 'YOUR_LIFF_ID_HERE'
+    // Line Login 設定
+    LIFF_ID: 'U4edacceec883d63286c86e09cf5f8e6a'
 };
 
 // 全域變數
@@ -418,15 +418,10 @@ function displayBasicRecommendations() {
 async function initializeLiff() {
     try {
         console.log('初始化 LIFF...');
-        
-        // 如果沒有設定 LIFF ID，使用模擬模式
-        if (CONFIG.LIFF_ID === 'YOUR_LIFF_ID_HERE') {
-            console.log('使用模擬 Line 登入模式');
-            showMockLineLogin();
-            return;
-        }
+        console.log('LIFF ID:', CONFIG.LIFF_ID);
         
         await liff.init({ liffId: CONFIG.LIFF_ID });
+        console.log('LIFF 初始化成功');
         
         if (liff.isLoggedIn()) {
             console.log('用戶已登入');
@@ -438,7 +433,8 @@ async function initializeLiff() {
         }
     } catch (error) {
         console.error('LIFF 初始化失敗:', error);
-        showMockLineLogin();
+        // 如果 LIFF 初始化失敗，顯示錯誤訊息
+        showLiffError(error);
     }
 }
 
@@ -463,12 +459,43 @@ function showLineLoginSection() {
     document.getElementById('calculatorSection').style.display = 'none';
     
     document.getElementById('lineLoginBtn').addEventListener('click', function() {
-        if (typeof liff !== 'undefined') {
-            liff.login();
-        } else {
+        try {
+            if (typeof liff !== 'undefined' && liff.login) {
+                liff.login();
+            } else {
+                throw new Error('LIFF 未正確載入');
+            }
+        } catch (error) {
+            console.error('登入錯誤:', error);
             alert('Line 登入服務暫時無法使用，請稍後再試');
         }
     });
+}
+
+function showLiffError(error) {
+    console.error('LIFF 錯誤:', error);
+    
+    // 更新登入卡片顯示錯誤訊息
+    const loginCard = document.querySelector('.login-card');
+    if (loginCard) {
+        loginCard.innerHTML = `
+            <h2>⚠️ 服務暫時無法使用</h2>
+            <p>Line 登入服務發生錯誤，請稍後再試。</p>
+            <p><small>錯誤訊息：${error.message}</small></p>
+            <button onclick="location.reload()" style="
+                background: #00C300; 
+                color: white; 
+                border: none; 
+                padding: 12px 24px; 
+                border-radius: 8px; 
+                cursor: pointer;
+                margin-top: 20px;
+            ">重新載入</button>
+        `;
+    }
+    
+    document.getElementById('lineLoginSection').style.display = 'block';
+    document.getElementById('calculatorSection').style.display = 'none';
 }
 
 function handleLineLogin(profile) {
