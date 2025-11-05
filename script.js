@@ -6,355 +6,430 @@ const CONFIG = {
     TEMPERATURE: 0.7
 };
 
-// 台灣中小企業行業配置（30個常見行業分類）
+// 全域變數
+let calculationData = null;
+
+// 業態分類對應表
+const businessCategories = {
+    food_service: [
+        { value: 'restaurant', text: '小吃/便當/熱炒/火鍋/燒肉等堂食餐廳' },
+        { value: 'beverage_chain', text: '手搖飲/咖啡/甜點/早午餐品牌（2-5門市型）' },
+        { value: 'catering_service', text: '外燴/餐盒/中央廚房型小團隊' }
+    ],
+    retail_ecommerce: [
+        { value: 'fashion_ecommerce', text: '服飾/鞋包/飾品買手型公司（電商+直播）' },
+        { value: 'retail_chain', text: '實體零售門市小連鎖（3C配件/手機維修/保健食品/藥妝）' },
+        { value: 'ecommerce_brand', text: '自有品牌電商（蝦皮/MOMO/官網DTC）' }
+    ],
+    beauty_health: [
+        { value: 'beauty_fitness', text: '美容美體/醫美門診/健身教室/運動教練工作室' }
+    ],
+    education: [
+        { value: 'education_training', text: '企業內訓/補教/才藝教室/技職訓練中心' }
+    ],
+    real_estate: [
+        { value: 'real_estate', text: '仲介/代管（不動產仲介/包租代管/社宅代管）' }
+    ],
+    automotive: [
+        { value: 'auto_service', text: '汽機車保修與鈑噴/定檢保養' },
+        { value: 'auto_parts', text: '汽機車零件批發/維修體系零件供應商' }
+    ],
+    engineering: [
+        { value: 'electrical_engineering', text: '水電工程行/弱電監控佈線團隊' },
+        { value: 'interior_design', text: '室內裝修/系統櫥櫃/木作/設計統包公司' },
+        { value: 'construction', text: '小型營造/土木包商' },
+        { value: 'green_energy', text: '太陽能/節能設備/淨零相關施工小團隊' },
+        { value: 'facility_maintenance', text: '廠房機電維護團隊（長約維修保養）' }
+    ],
+    design_marketing: [
+        { value: 'design_marketing', text: '平面設計/品牌設計/行銷代營運公司' }
+    ],
+    technology: [
+        { value: 'it_consulting', text: '網站/系統整合/軟體客製/AI顧問小型公司' }
+    ],
+    manufacturing: [
+        { value: 'metal_manufacturing', text: '金屬加工/機械零配件工廠' },
+        { value: 'plastic_manufacturing', text: '塑膠射出/包裝/印刷加工廠' },
+        { value: 'food_oem', text: '食品代工/醬料代工/烘焙代工工作室' },
+        { value: 'cosmetic_oem', text: '美妝/清潔用品OEM/ODM小工廠' },
+        { value: 'gift_manufacturing', text: '客製化禮贈品/廣告贈品工廠' }
+    ],
+    outsourcing: [
+        { value: 'outsourcing_service', text: '清潔外包/派遣/安管（保全/清潔/臨時工派遣）' }
+    ],
+    logistics: [
+        { value: 'logistics', text: '物流/快遞/倉儲代管/外送車隊' }
+    ],
+    trading: [
+        { value: 'supply_chain', text: '原物料/零組件供應商（B2B供應）' },
+        { value: 'import_export', text: '進出口貿易公司（代理國外品牌）' },
+        { value: 'product_agency', text: '食品/保健品/化妝品代理商' }
+    ],
+    tourism: [
+        { value: 'hospitality', text: '民宿/旅宿/包棟/露營園區經營團隊' },
+        { value: 'tourism', text: '在地觀光體驗/旅遊小包團公司' }
+    ]
+};
+
+// 更新業態細項選單
+function updateBusinessTypes() {
+    console.log('updateBusinessTypes 被呼叫');
+    
+    const categorySelect = document.getElementById('businessCategory');
+    const typeSelect = document.getElementById('businessType');
+    
+    if (!categorySelect || !typeSelect) {
+        console.error('找不到選單元素');
+        return;
+    }
+    
+    const selectedCategory = categorySelect.value;
+    console.log('選擇的大類:', selectedCategory);
+    
+    // 清空細項選單
+    typeSelect.innerHTML = '';
+    
+    if (!selectedCategory) {
+        typeSelect.disabled = true;
+        typeSelect.innerHTML = '<option value="">請先選擇業態大類</option>';
+        return;
+    }
+    
+    // 啟用細項選單
+    typeSelect.disabled = false;
+    typeSelect.innerHTML = '<option value="">請選擇具體業態</option>';
+    
+    // 加入對應的細項選項
+    const businessTypes = businessCategories[selectedCategory];
+    console.log('對應的業態:', businessTypes);
+    
+    if (businessTypes) {
+        businessTypes.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type.value;
+            option.textContent = type.text;
+            typeSelect.appendChild(option);
+        });
+        console.log('已加入', businessTypes.length, '個選項');
+    }
+}// 台灣
+中小企業行業配置（30個常見行業分類）
 const industryConfig = {
     // 餐飲服務類
     restaurant: {
         name: '小吃/便當/熱炒/火鍋/燒肉等堂食餐廳',
         hrRatio: 0.42,
         departments: {
-            sales: { ratio: 0.65, avgSalary: 32000 }, // 外場服務人員
-            product: { ratio: 0.25, avgSalary: 35000 }, // 廚房人員
-            marketing: { ratio: 0.05, avgSalary: 38000 }, // 行銷推廣
-            admin: { ratio: 0.05, avgSalary: 40000 }     // 行政管理
+            sales: { ratio: 0.65, avgSalary: 32000 },
+            product: { ratio: 0.25, avgSalary: 35000 },
+            marketing: { ratio: 0.05, avgSalary: 38000 },
+            admin: { ratio: 0.05, avgSalary: 40000 }
         }
     },
-    
     beverage_chain: {
         name: '手搖飲/咖啡/甜點/早午餐品牌（2-5門市型）',
         hrRatio: 0.45,
         departments: {
-            sales: { ratio: 0.60, avgSalary: 30000 }, // 門市人員
-            product: { ratio: 0.20, avgSalary: 33000 }, // 製作人員
-            marketing: { ratio: 0.10, avgSalary: 42000 }, // 品牌行銷
-            admin: { ratio: 0.10, avgSalary: 38000 }     // 營運管理
+            sales: { ratio: 0.60, avgSalary: 30000 },
+            product: { ratio: 0.20, avgSalary: 33000 },
+            marketing: { ratio: 0.10, avgSalary: 42000 },
+            admin: { ratio: 0.10, avgSalary: 38000 }
         }
     },
-    
     catering_service: {
         name: '外燴/餐盒/中央廚房型小團隊',
         hrRatio: 0.38,
         departments: {
-            sales: { ratio: 0.30, avgSalary: 35000 }, // 業務接單
-            product: { ratio: 0.50, avgSalary: 36000 }, // 廚房製作
-            marketing: { ratio: 0.10, avgSalary: 40000 }, // 行銷推廣
-            admin: { ratio: 0.10, avgSalary: 38000 }     // 行政管理
+            sales: { ratio: 0.30, avgSalary: 35000 },
+            product: { ratio: 0.50, avgSalary: 36000 },
+            marketing: { ratio: 0.10, avgSalary: 40000 },
+            admin: { ratio: 0.10, avgSalary: 38000 }
         }
     },
-    
     // 零售電商類
     fashion_ecommerce: {
         name: '服飾/鞋包/飾品買手型公司（電商+直播）',
         hrRatio: 0.40,
         departments: {
-            sales: { ratio: 0.40, avgSalary: 38000 }, // 直播銷售
-            product: { ratio: 0.25, avgSalary: 42000 }, // 商品採購
-            marketing: { ratio: 0.25, avgSalary: 45000 }, // 電商行銷
-            admin: { ratio: 0.10, avgSalary: 40000 }     // 後勤管理
+            sales: { ratio: 0.40, avgSalary: 38000 },
+            product: { ratio: 0.25, avgSalary: 42000 },
+            marketing: { ratio: 0.25, avgSalary: 45000 },
+            admin: { ratio: 0.10, avgSalary: 40000 }
         }
     },
-    
     retail_chain: {
         name: '實體零售門市小連鎖（3C配件/手機維修/保健食品/藥妝）',
         hrRatio: 0.38,
         departments: {
-            sales: { ratio: 0.50, avgSalary: 34000 }, // 門市銷售
-            product: { ratio: 0.25, avgSalary: 38000 }, // 技術維修
-            marketing: { ratio: 0.15, avgSalary: 42000 }, // 行銷推廣
-            admin: { ratio: 0.10, avgSalary: 40000 }     // 營運管理
+            sales: { ratio: 0.50, avgSalary: 34000 },
+            product: { ratio: 0.25, avgSalary: 38000 },
+            marketing: { ratio: 0.15, avgSalary: 42000 },
+            admin: { ratio: 0.10, avgSalary: 40000 }
         }
     },
-    
     ecommerce_brand: {
         name: '自有品牌電商（蝦皮/MOMO/官網DTC）',
         hrRatio: 0.35,
         departments: {
-            sales: { ratio: 0.30, avgSalary: 40000 }, // 電商營運
-            product: { ratio: 0.30, avgSalary: 45000 }, // 商品開發
-            marketing: { ratio: 0.30, avgSalary: 48000 }, // 數位行銷
-            admin: { ratio: 0.10, avgSalary: 42000 }     // 行政管理
+            sales: { ratio: 0.30, avgSalary: 40000 },
+            product: { ratio: 0.30, avgSalary: 45000 },
+            marketing: { ratio: 0.30, avgSalary: 48000 },
+            admin: { ratio: 0.10, avgSalary: 42000 }
         }
     },
-    
     // 美容健康類
     beauty_fitness: {
         name: '美容美體/醫美門診/健身教室/運動教練工作室',
         hrRatio: 0.48,
         departments: {
-            sales: { ratio: 0.35, avgSalary: 38000 }, // 諮詢銷售
-            product: { ratio: 0.45, avgSalary: 45000 }, // 專業服務
-            marketing: { ratio: 0.15, avgSalary: 42000 }, // 行銷推廣
-            admin: { ratio: 0.05, avgSalary: 40000 }     // 行政管理
+            sales: { ratio: 0.35, avgSalary: 38000 },
+            product: { ratio: 0.45, avgSalary: 45000 },
+            marketing: { ratio: 0.15, avgSalary: 42000 },
+            admin: { ratio: 0.05, avgSalary: 40000 }
         }
     },
-    
     // 教育培訓類
     education_training: {
         name: '企業內訓/補教/才藝教室/技職訓練中心',
         hrRatio: 0.55,
         departments: {
-            sales: { ratio: 0.25, avgSalary: 42000 }, // 招生業務
-            product: { ratio: 0.55, avgSalary: 48000 }, // 教學師資
-            marketing: { ratio: 0.15, avgSalary: 45000 }, // 行銷推廣
-            admin: { ratio: 0.05, avgSalary: 38000 }     // 行政管理
+            sales: { ratio: 0.25, avgSalary: 42000 },
+            product: { ratio: 0.55, avgSalary: 48000 },
+            marketing: { ratio: 0.15, avgSalary: 45000 },
+            admin: { ratio: 0.05, avgSalary: 38000 }
         }
     },
-    
     // 房地產服務類
     real_estate: {
         name: '仲介/代管（不動產仲介/包租代管/社宅代管）',
         hrRatio: 0.45,
         departments: {
-            sales: { ratio: 0.60, avgSalary: 40000 }, // 仲介業務
-            product: { ratio: 0.20, avgSalary: 38000 }, // 物業管理
-            marketing: { ratio: 0.15, avgSalary: 42000 }, // 行銷推廣
-            admin: { ratio: 0.05, avgSalary: 40000 }     // 行政管理
+            sales: { ratio: 0.60, avgSalary: 40000 },
+            product: { ratio: 0.20, avgSalary: 38000 },
+            marketing: { ratio: 0.15, avgSalary: 42000 },
+            admin: { ratio: 0.05, avgSalary: 40000 }
         }
     },
-    
     // 汽車服務類
     auto_service: {
         name: '汽機車保修與鈑噴/定檢保養',
         hrRatio: 0.35,
         departments: {
-            sales: { ratio: 0.25, avgSalary: 36000 }, // 接待業務
-            product: { ratio: 0.60, avgSalary: 42000 }, // 技術維修
-            marketing: { ratio: 0.10, avgSalary: 40000 }, // 行銷推廣
-            admin: { ratio: 0.05, avgSalary: 38000 }     // 行政管理
+            sales: { ratio: 0.25, avgSalary: 36000 },
+            product: { ratio: 0.60, avgSalary: 42000 },
+            marketing: { ratio: 0.10, avgSalary: 40000 },
+            admin: { ratio: 0.05, avgSalary: 38000 }
         }
     },
-    
     auto_parts: {
         name: '汽機車零件批發/維修體系零件供應商',
         hrRatio: 0.32,
         departments: {
-            sales: { ratio: 0.40, avgSalary: 38000 }, // 業務銷售
-            product: { ratio: 0.35, avgSalary: 40000 }, // 倉儲物流
-            marketing: { ratio: 0.15, avgSalary: 42000 }, // 行銷推廣
-            admin: { ratio: 0.10, avgSalary: 40000 }     // 行政管理
+            sales: { ratio: 0.40, avgSalary: 38000 },
+            product: { ratio: 0.35, avgSalary: 40000 },
+            marketing: { ratio: 0.15, avgSalary: 42000 },
+            admin: { ratio: 0.10, avgSalary: 40000 }
         }
     },
-    
     // 工程建設類
     electrical_engineering: {
         name: '水電工程行/弱電監控佈線團隊',
         hrRatio: 0.38,
         departments: {
-            sales: { ratio: 0.20, avgSalary: 42000 }, // 工程業務
-            product: { ratio: 0.65, avgSalary: 45000 }, // 施工技術
-            marketing: { ratio: 0.10, avgSalary: 40000 }, // 行銷推廣
-            admin: { ratio: 0.05, avgSalary: 38000 }     // 行政管理
+            sales: { ratio: 0.20, avgSalary: 42000 },
+            product: { ratio: 0.65, avgSalary: 45000 },
+            marketing: { ratio: 0.10, avgSalary: 40000 },
+            admin: { ratio: 0.05, avgSalary: 38000 }
         }
     },
-    
     interior_design: {
         name: '室內裝修/系統櫥櫃/木作/設計統包公司',
         hrRatio: 0.40,
         departments: {
-            sales: { ratio: 0.25, avgSalary: 45000 }, // 設計業務
-            product: { ratio: 0.55, avgSalary: 48000 }, // 設計施工
-            marketing: { ratio: 0.15, avgSalary: 42000 }, // 行銷推廣
-            admin: { ratio: 0.05, avgSalary: 40000 }     // 行政管理
+            sales: { ratio: 0.25, avgSalary: 45000 },
+            product: { ratio: 0.55, avgSalary: 48000 },
+            marketing: { ratio: 0.15, avgSalary: 42000 },
+            admin: { ratio: 0.05, avgSalary: 40000 }
         }
     },
-    
     construction: {
         name: '小型營造/土木包商',
         hrRatio: 0.32,
         departments: {
-            sales: { ratio: 0.15, avgSalary: 48000 }, // 工程業務
-            product: { ratio: 0.70, avgSalary: 45000 }, // 施工人員
-            marketing: { ratio: 0.05, avgSalary: 40000 }, // 行銷推廣
-            admin: { ratio: 0.10, avgSalary: 42000 }     // 工程管理
+            sales: { ratio: 0.15, avgSalary: 48000 },
+            product: { ratio: 0.70, avgSalary: 45000 },
+            marketing: { ratio: 0.05, avgSalary: 40000 },
+            admin: { ratio: 0.10, avgSalary: 42000 }
         }
     },
-    
     green_energy: {
         name: '太陽能/節能設備/淨零相關施工小團隊',
         hrRatio: 0.35,
         departments: {
-            sales: { ratio: 0.25, avgSalary: 45000 }, // 專案業務
-            product: { ratio: 0.60, avgSalary: 48000 }, // 技術施工
-            marketing: { ratio: 0.10, avgSalary: 42000 }, // 行銷推廣
-            admin: { ratio: 0.05, avgSalary: 40000 }     // 行政管理
+            sales: { ratio: 0.25, avgSalary: 45000 },
+            product: { ratio: 0.60, avgSalary: 48000 },
+            marketing: { ratio: 0.10, avgSalary: 42000 },
+            admin: { ratio: 0.05, avgSalary: 40000 }
         }
     },
-    
     facility_maintenance: {
         name: '廠房機電維護團隊（長約維修保養）',
         hrRatio: 0.40,
         departments: {
-            sales: { ratio: 0.20, avgSalary: 45000 }, // 業務開發
-            product: { ratio: 0.65, avgSalary: 48000 }, // 維護技術
-            marketing: { ratio: 0.10, avgSalary: 42000 }, // 行銷推廣
-            admin: { ratio: 0.05, avgSalary: 40000 }     // 行政管理
+            sales: { ratio: 0.20, avgSalary: 45000 },
+            product: { ratio: 0.65, avgSalary: 48000 },
+            marketing: { ratio: 0.10, avgSalary: 42000 },
+            admin: { ratio: 0.05, avgSalary: 40000 }
         }
     },
-    
     // 設計行銷類
     design_marketing: {
         name: '平面設計/品牌設計/行銷代營運公司',
         hrRatio: 0.50,
         departments: {
-            sales: { ratio: 0.25, avgSalary: 45000 }, // 業務開發
-            product: { ratio: 0.50, avgSalary: 50000 }, // 設計創作
-            marketing: { ratio: 0.20, avgSalary: 48000 }, // 行銷推廣
-            admin: { ratio: 0.05, avgSalary: 42000 }     // 行政管理
+            sales: { ratio: 0.25, avgSalary: 45000 },
+            product: { ratio: 0.50, avgSalary: 50000 },
+            marketing: { ratio: 0.20, avgSalary: 48000 },
+            admin: { ratio: 0.05, avgSalary: 42000 }
         }
     },
-    
     // 科技資訊類
     it_consulting: {
         name: '網站/系統整合/軟體客製/AI顧問小型公司',
         hrRatio: 0.45,
         departments: {
-            sales: { ratio: 0.20, avgSalary: 55000 }, // 業務開發
-            product: { ratio: 0.60, avgSalary: 65000 }, // 技術開發
-            marketing: { ratio: 0.15, avgSalary: 50000 }, // 行銷推廣
-            admin: { ratio: 0.05, avgSalary: 45000 }     // 行政管理
+            sales: { ratio: 0.20, avgSalary: 55000 },
+            product: { ratio: 0.60, avgSalary: 65000 },
+            marketing: { ratio: 0.15, avgSalary: 50000 },
+            admin: { ratio: 0.05, avgSalary: 45000 }
         }
     },
-    
     // 製造加工類
     metal_manufacturing: {
         name: '金屬加工/機械零配件工廠',
         hrRatio: 0.30,
         departments: {
-            sales: { ratio: 0.20, avgSalary: 42000 }, // 業務銷售
-            product: { ratio: 0.65, avgSalary: 45000 }, // 生產製造
-            marketing: { ratio: 0.05, avgSalary: 40000 }, // 行銷推廣
-            admin: { ratio: 0.10, avgSalary: 42000 }     // 行政管理
+            sales: { ratio: 0.20, avgSalary: 42000 },
+            product: { ratio: 0.65, avgSalary: 45000 },
+            marketing: { ratio: 0.05, avgSalary: 40000 },
+            admin: { ratio: 0.10, avgSalary: 42000 }
         }
     },
-    
     plastic_manufacturing: {
         name: '塑膠射出/包裝/印刷加工廠',
         hrRatio: 0.28,
         departments: {
-            sales: { ratio: 0.25, avgSalary: 40000 }, // 業務銷售
-            product: { ratio: 0.60, avgSalary: 42000 }, // 生產製造
-            marketing: { ratio: 0.05, avgSalary: 38000 }, // 行銷推廣
-            admin: { ratio: 0.10, avgSalary: 40000 }     // 行政管理
+            sales: { ratio: 0.25, avgSalary: 40000 },
+            product: { ratio: 0.60, avgSalary: 42000 },
+            marketing: { ratio: 0.05, avgSalary: 38000 },
+            admin: { ratio: 0.10, avgSalary: 40000 }
         }
     },
-    
     food_oem: {
         name: '食品代工/醬料代工/烘焙代工工作室',
         hrRatio: 0.32,
         departments: {
-            sales: { ratio: 0.25, avgSalary: 38000 }, // 業務開發
-            product: { ratio: 0.60, avgSalary: 40000 }, // 生產製作
-            marketing: { ratio: 0.05, avgSalary: 40000 }, // 行銷推廣
-            admin: { ratio: 0.10, avgSalary: 38000 }     // 行政管理
+            sales: { ratio: 0.25, avgSalary: 38000 },
+            product: { ratio: 0.60, avgSalary: 40000 },
+            marketing: { ratio: 0.05, avgSalary: 40000 },
+            admin: { ratio: 0.10, avgSalary: 38000 }
         }
     },
-    
     cosmetic_oem: {
         name: '美妝/清潔用品OEM/ODM小工廠',
         hrRatio: 0.30,
         departments: {
-            sales: { ratio: 0.30, avgSalary: 42000 }, // 業務開發
-            product: { ratio: 0.50, avgSalary: 45000 }, // 研發生產
-            marketing: { ratio: 0.10, avgSalary: 45000 }, // 行銷推廣
-            admin: { ratio: 0.10, avgSalary: 40000 }     // 行政管理
+            sales: { ratio: 0.30, avgSalary: 42000 },
+            product: { ratio: 0.50, avgSalary: 45000 },
+            marketing: { ratio: 0.10, avgSalary: 45000 },
+            admin: { ratio: 0.10, avgSalary: 40000 }
         }
     },
-    
     gift_manufacturing: {
         name: '客製化禮贈品/廣告贈品工廠',
         hrRatio: 0.32,
         departments: {
-            sales: { ratio: 0.35, avgSalary: 38000 }, // 業務銷售
-            product: { ratio: 0.50, avgSalary: 40000 }, // 生產製作
-            marketing: { ratio: 0.10, avgSalary: 42000 }, // 行銷推廣
-            admin: { ratio: 0.05, avgSalary: 38000 }     // 行政管理
+            sales: { ratio: 0.35, avgSalary: 38000 },
+            product: { ratio: 0.50, avgSalary: 40000 },
+            marketing: { ratio: 0.10, avgSalary: 42000 },
+            admin: { ratio: 0.05, avgSalary: 38000 }
         }
     },
-    
     // 服務外包類
     outsourcing_service: {
         name: '清潔外包/派遣/安管（保全/清潔/臨時工派遣）',
         hrRatio: 0.50,
         departments: {
-            sales: { ratio: 0.20, avgSalary: 35000 }, // 業務開發
-            product: { ratio: 0.70, avgSalary: 30000 }, // 服務人員
-            marketing: { ratio: 0.05, avgSalary: 38000 }, // 行銷推廣
-            admin: { ratio: 0.05, avgSalary: 38000 }     // 行政管理
+            sales: { ratio: 0.20, avgSalary: 35000 },
+            product: { ratio: 0.70, avgSalary: 30000 },
+            marketing: { ratio: 0.05, avgSalary: 38000 },
+            admin: { ratio: 0.05, avgSalary: 38000 }
         }
     },
-    
     // 物流運輸類
     logistics: {
         name: '物流/快遞/倉儲代管/外送車隊',
         hrRatio: 0.45,
         departments: {
-            sales: { ratio: 0.15, avgSalary: 38000 }, // 業務開發
-            product: { ratio: 0.70, avgSalary: 35000 }, // 運輸人員
-            marketing: { ratio: 0.05, avgSalary: 40000 }, // 行銷推廣
-            admin: { ratio: 0.10, avgSalary: 40000 }     // 營運管理
+            sales: { ratio: 0.15, avgSalary: 38000 },
+            product: { ratio: 0.70, avgSalary: 35000 },
+            marketing: { ratio: 0.05, avgSalary: 40000 },
+            admin: { ratio: 0.10, avgSalary: 40000 }
         }
     },
-    
     // 貿易供應類
     supply_chain: {
         name: '原物料/零組件供應商（B2B供應）',
         hrRatio: 0.28,
         departments: {
-            sales: { ratio: 0.40, avgSalary: 45000 }, // 業務銷售
-            product: { ratio: 0.35, avgSalary: 42000 }, // 採購物流
-            marketing: { ratio: 0.15, avgSalary: 45000 }, // 行銷推廣
-            admin: { ratio: 0.10, avgSalary: 42000 }     // 行政管理
+            sales: { ratio: 0.40, avgSalary: 45000 },
+            product: { ratio: 0.35, avgSalary: 42000 },
+            marketing: { ratio: 0.15, avgSalary: 45000 },
+            admin: { ratio: 0.10, avgSalary: 42000 }
         }
     },
-    
     import_export: {
         name: '進出口貿易公司（代理國外品牌）',
         hrRatio: 0.35,
         departments: {
-            sales: { ratio: 0.45, avgSalary: 48000 }, // 業務銷售
-            product: { ratio: 0.25, avgSalary: 45000 }, // 採購物流
-            marketing: { ratio: 0.20, avgSalary: 50000 }, // 行銷推廣
-            admin: { ratio: 0.10, avgSalary: 45000 }     // 行政管理
+            sales: { ratio: 0.45, avgSalary: 48000 },
+            product: { ratio: 0.25, avgSalary: 45000 },
+            marketing: { ratio: 0.20, avgSalary: 50000 },
+            admin: { ratio: 0.10, avgSalary: 45000 }
         }
     },
-    
     product_agency: {
         name: '食品/保健品/化妝品代理商',
         hrRatio: 0.38,
         departments: {
-            sales: { ratio: 0.50, avgSalary: 42000 }, // 業務銷售
-            product: { ratio: 0.25, avgSalary: 40000 }, // 產品管理
-            marketing: { ratio: 0.20, avgSalary: 48000 }, // 行銷推廣
-            admin: { ratio: 0.05, avgSalary: 42000 }     // 行政管理
+            sales: { ratio: 0.50, avgSalary: 42000 },
+            product: { ratio: 0.25, avgSalary: 40000 },
+            marketing: { ratio: 0.20, avgSalary: 48000 },
+            admin: { ratio: 0.05, avgSalary: 42000 }
         }
     },
-    
     // 觀光旅遊類
     hospitality: {
         name: '民宿/旅宿/包棟/露營園區經營團隊',
         hrRatio: 0.42,
         departments: {
-            sales: { ratio: 0.30, avgSalary: 35000 }, // 接待服務
-            product: { ratio: 0.50, avgSalary: 32000 }, // 房務清潔
-            marketing: { ratio: 0.15, avgSalary: 40000 }, // 行銷推廣
-            admin: { ratio: 0.05, avgSalary: 38000 }     // 行政管理
+            sales: { ratio: 0.30, avgSalary: 35000 },
+            product: { ratio: 0.50, avgSalary: 32000 },
+            marketing: { ratio: 0.15, avgSalary: 40000 },
+            admin: { ratio: 0.05, avgSalary: 38000 }
         }
     },
-    
     tourism: {
         name: '在地觀光體驗/旅遊小包團公司',
         hrRatio: 0.45,
         departments: {
-            sales: { ratio: 0.35, avgSalary: 38000 }, // 業務銷售
-            product: { ratio: 0.45, avgSalary: 40000 }, // 導遊領隊
-            marketing: { ratio: 0.15, avgSalary: 42000 }, // 行銷推廣
-            admin: { ratio: 0.05, avgSalary: 38000 }     // 行政管理
+            sales: { ratio: 0.35, avgSalary: 38000 },
+            product: { ratio: 0.45, avgSalary: 40000 },
+            marketing: { ratio: 0.15, avgSalary: 42000 },
+            admin: { ratio: 0.05, avgSalary: 38000 }
         }
     }
 };
-
-// 全域變數
-let calculationData = null;
 
 function calculateHRCosts() {
     console.log('calculateHRCosts 函數被呼叫');
@@ -596,8 +671,6 @@ async function callChatGPTAPI(apiKey, data) {
     return result.choices[0].message.content;
 }
 
-
-
 // 輸入驗證和格式化
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM 載入完成');
@@ -626,96 +699,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-});// 業
-態分類對應表
-const businessCategories = {
-    food_service: [
-        { value: 'restaurant', text: '小吃/便當/熱炒/火鍋/燒肉等堂食餐廳' },
-        { value: 'beverage_chain', text: '手搖飲/咖啡/甜點/早午餐品牌（2-5門市型）' },
-        { value: 'catering_service', text: '外燴/餐盒/中央廚房型小團隊' }
-    ],
-    retail_ecommerce: [
-        { value: 'fashion_ecommerce', text: '服飾/鞋包/飾品買手型公司（電商+直播）' },
-        { value: 'retail_chain', text: '實體零售門市小連鎖（3C配件/手機維修/保健食品/藥妝）' },
-        { value: 'ecommerce_brand', text: '自有品牌電商（蝦皮/MOMO/官網DTC）' }
-    ],
-    beauty_health: [
-        { value: 'beauty_fitness', text: '美容美體/醫美門診/健身教室/運動教練工作室' }
-    ],
-    education: [
-        { value: 'education_training', text: '企業內訓/補教/才藝教室/技職訓練中心' }
-    ],
-    real_estate: [
-        { value: 'real_estate', text: '仲介/代管（不動產仲介/包租代管/社宅代管）' }
-    ],
-    automotive: [
-        { value: 'auto_service', text: '汽機車保修與鈑噴/定檢保養' },
-        { value: 'auto_parts', text: '汽機車零件批發/維修體系零件供應商' }
-    ],
-    engineering: [
-        { value: 'electrical_engineering', text: '水電工程行/弱電監控佈線團隊' },
-        { value: 'interior_design', text: '室內裝修/系統櫥櫃/木作/設計統包公司' },
-        { value: 'construction', text: '小型營造/土木包商' },
-        { value: 'green_energy', text: '太陽能/節能設備/淨零相關施工小團隊' },
-        { value: 'facility_maintenance', text: '廠房機電維護團隊（長約維修保養）' }
-    ],
-    design_marketing: [
-        { value: 'design_marketing', text: '平面設計/品牌設計/行銷代營運公司' }
-    ],
-    technology: [
-        { value: 'it_consulting', text: '網站/系統整合/軟體客製/AI顧問小型公司' }
-    ],
-    manufacturing: [
-        { value: 'metal_manufacturing', text: '金屬加工/機械零配件工廠' },
-        { value: 'plastic_manufacturing', text: '塑膠射出/包裝/印刷加工廠' },
-        { value: 'food_oem', text: '食品代工/醬料代工/烘焙代工工作室' },
-        { value: 'cosmetic_oem', text: '美妝/清潔用品OEM/ODM小工廠' },
-        { value: 'gift_manufacturing', text: '客製化禮贈品/廣告贈品工廠' }
-    ],
-    outsourcing: [
-        { value: 'outsourcing_service', text: '清潔外包/派遣/安管（保全/清潔/臨時工派遣）' }
-    ],
-    logistics: [
-        { value: 'logistics', text: '物流/快遞/倉儲代管/外送車隊' }
-    ],
-    trading: [
-        { value: 'supply_chain', text: '原物料/零組件供應商（B2B供應）' },
-        { value: 'import_export', text: '進出口貿易公司（代理國外品牌）' },
-        { value: 'product_agency', text: '食品/保健品/化妝品代理商' }
-    ],
-    tourism: [
-        { value: 'hospitality', text: '民宿/旅宿/包棟/露營園區經營團隊' },
-        { value: 'tourism', text: '在地觀光體驗/旅遊小包團公司' }
-    ]
-};
-
-// 更新業態細項選單
-function updateBusinessTypes() {
-    const categorySelect = document.getElementById('businessCategory');
-    const typeSelect = document.getElementById('businessType');
-    const selectedCategory = categorySelect.value;
-    
-    // 清空細項選單
-    typeSelect.innerHTML = '';
-    
-    if (!selectedCategory) {
-        typeSelect.disabled = true;
-        typeSelect.innerHTML = '<option value="">請先選擇業態大類</option>';
-        return;
-    }
-    
-    // 啟用細項選單
-    typeSelect.disabled = false;
-    typeSelect.innerHTML = '<option value="">請選擇具體業態</option>';
-    
-    // 加入對應的細項選項
-    const businessTypes = businessCategories[selectedCategory];
-    if (businessTypes) {
-        businessTypes.forEach(type => {
-            const option = document.createElement('option');
-            option.value = type.value;
-            option.textContent = type.text;
-            typeSelect.appendChild(option);
-        });
-    }
-}
+});
