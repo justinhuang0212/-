@@ -1,0 +1,9 @@
+# 忽略檔案
+.DS_Store
+*.log
+node_modules/
+.env
+
+# 備份檔案
+*-backup.*
+test-*
