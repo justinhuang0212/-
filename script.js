@@ -228,16 +228,64 @@ const industryConfig = {
 function calculateHRCosts() {
     console.log('calculateHRCosts 函數被呼叫');
     
-    const companyName = document.getElementById('companyName').value;
+    // 獲取所有輸入值
+    const contactName = document.getElementById('contactName').value.trim();
+    const contactPhone = document.getElementById('contactPhone').value.trim();
+    const companyName = document.getElementById('companyName').value.trim();
     const businessType = document.getElementById('businessType').value;
     const revenue = parseFloat(document.getElementById('revenue').value) || 0;
     const grossMargin = parseFloat(document.getElementById('grossMargin').value) || 0;
     const employeeCount = parseInt(document.getElementById('employeeCount').value) || 0;
     
-    console.log('輸入值：', { companyName, businessType, revenue, grossMargin, employeeCount });
+    console.log('輸入值：', { contactName, contactPhone, companyName, businessType, revenue, grossMargin, employeeCount });
     
-    if (!businessType || revenue <= 0 || grossMargin <= 0) {
-        alert('請填寫完整的公司資料');
+    // 驗證必填欄位
+    if (!contactName) {
+        alert('請輸入聯絡人姓名');
+        document.getElementById('contactName').focus();
+        return;
+    }
+    
+    if (!contactPhone) {
+        alert('請輸入聯絡電話');
+        document.getElementById('contactPhone').focus();
+        return;
+    }
+    
+    // 驗證電話號碼格式（台灣手機或市話）
+    const phoneRegex = /^(09\d{8}|0[2-8]\d{7,8})$/;
+    if (!phoneRegex.test(contactPhone.replace(/[-\s]/g, ''))) {
+        alert('請輸入正確的電話號碼格式');
+        document.getElementById('contactPhone').focus();
+        return;
+    }
+    
+    if (!companyName) {
+        alert('請輸入公司名稱');
+        document.getElementById('companyName').focus();
+        return;
+    }
+    
+    if (!businessType) {
+        alert('請選擇業態');
+        return;
+    }
+    
+    if (revenue <= 0) {
+        alert('請輸入年營業額');
+        document.getElementById('revenue').focus();
+        return;
+    }
+    
+    if (grossMargin <= 0 || grossMargin > 100) {
+        alert('請輸入正確的毛利率（1-100%）');
+        document.getElementById('grossMargin').focus();
+        return;
+    }
+    
+    if (employeeCount <= 0) {
+        alert('請輸入員工人數');
+        document.getElementById('employeeCount').focus();
         return;
     }
     
@@ -255,6 +303,8 @@ function calculateHRCosts() {
     const departments = calculateDepartments(config, monthlyHRCost);
     
     calculationData = {
+        contactName,
+        contactPhone,
         companyName,
         businessType: config.name,
         revenue,

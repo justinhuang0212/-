@@ -11,12 +11,28 @@
         <h1>中小企業人事成本計算器</h1>
         
         <div class="calculator">
+            <div class="line-notice">
+                此工具專為 Line 官方帳號好友提供，請確保您已加入我們的 Line 好友
+            </div>
+            
             <div class="company-info">
+                <h2>聯絡人資料</h2>
+                
+                <div class="input-group">
+                    <label for="contactName">聯絡人姓名：<span class="required">*</span></label>
+                    <input type="text" id="contactName" placeholder="請輸入聯絡人姓名" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="contactPhone">聯絡電話：<span class="required">*</span></label>
+                    <input type="tel" id="contactPhone" placeholder="請輸入聯絡電話" required>
+                </div>
+                
                 <h2>公司基本資料</h2>
                 
                 <div class="input-group">
-                    <label for="companyName">公司名稱：</label>
-                    <input type="text" id="companyName" placeholder="請輸入公司名稱">
+                    <label for="companyName">公司名稱：<span class="required">*</span></label>
+                    <input type="text" id="companyName" placeholder="請輸入公司名稱" required>
                 </div>
                 
                 <div class="input-group">
@@ -48,18 +64,18 @@
                 </div>
                 
                 <div class="input-group">
-                    <label for="revenue">年營業額（萬元）：</label>
-                    <input type="number" id="revenue" placeholder="請輸入年營業額">
+                    <label for="revenue">年營業額（萬元）：<span class="required">*</span></label>
+                    <input type="number" id="revenue" placeholder="請輸入年營業額" required>
                 </div>
                 
                 <div class="input-group">
-                    <label for="grossMargin">毛利率（%）：</label>
-                    <input type="number" id="grossMargin" placeholder="請輸入毛利率" min="0" max="100">
+                    <label for="grossMargin">毛利率（%）：<span class="required">*</span></label>
+                    <input type="number" id="grossMargin" placeholder="請輸入毛利率" min="0" max="100" required>
                 </div>
                 
                 <div class="input-group">
-                    <label for="employeeCount">目前員工人數：</label>
-                    <input type="number" id="employeeCount" placeholder="請輸入員工人數">
+                    <label for="employeeCount">目前員工人數：<span class="required">*</span></label>
+                    <input type="number" id="employeeCount" placeholder="請輸入員工人數" required>
                 </div>
                 
 

@@ -454,15 +454,22 @@ button:hover {
     }
 }
 
-/* API Key 輸入樣式 */
-.input-group small {
-    display: block;
-    margin-top: 5px;
-    color: #666;
-    font-size: 0.8em;
+/* 必填欄位樣式 */
+.required {
+    color: #e74c3c;
+    font-weight: bold;
 }
 
-input[type="password"] {
+/* 聯絡人資料區塊 */
+.company-info h2:first-child {
+    color: #e74c3c;
+    border-bottom: 2px solid #e74c3c;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+/* 電話號碼輸入框 */
+input[type="tel"] {
     width: 100%;
     padding: 12px;
     border: 2px solid #ddd;
@@ -471,104 +478,32 @@ input[type="password"] {
     transition: border-color 0.3s;
 }
 
-input[type="password"]:focus {
+input[type="tel"]:focus {
     outline: none;
     border-color: #3498db;
 }
 
-/* 按鈕群組 */
-.button-group {
-    display: flex;
-    gap: 15px;
-    margin: 25px 0;
+/* 必填欄位驗證 */
+input:required:invalid {
+    border-color: #e74c3c;
 }
 
-.button-group button {
-    flex: 1;
-    margin: 0;
+input:required:valid {
+    border-color: #27ae60;
 }
 
-.ai-button {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+/* Line 綁定提示 */
+.line-notice {
+    background: #00C300;
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: bold;
 }
 
-.ai-button:disabled {
-    background: #bdc3c7 !important;
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-.ai-button:hover:not(:disabled) {
-    transform: translateY(-2px);
-}
-
-/* AI 分析區域 */
-.ai-analysis {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    padding: 25px;
-    border-radius: 10px;
-    margin-top: 25px;
-    border-left: 4px solid #e74c3c;
-}
-
-.ai-analysis h3 {
-    color: #2c3e50;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* 載入動畫 */
-.loading {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 20px;
-    justify-content: center;
-}
-
-.spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #f3f3f3;
-    border-top: 2px solid #e74c3c;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* AI 內容樣式 */
-#ai-content {
-    line-height: 1.6;
-    color: #2c3e50;
-}
-
-#ai-content h4 {
-    color: #e74c3c;
-    margin: 15px 0 8px 0;
-}
-
-#ai-content ul {
-    margin: 10px 0;
-    padding-left: 20px;
-}
-
-#ai-content li {
-    margin: 5px 0;
-}
-
-/* 響應式設計 */
-@media (max-width: 768px) {
-    .button-group {
-        flex-direction: column;
-    }
-    
-    .button-group button {
-        margin: 5px 0;
-    }
+.line-notice::before {
+    content: "📱 ";
+    font-size: 1.2em;
 }
