@@ -675,6 +675,15 @@ async function callChatGPTAPI(apiKey, data) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM 載入完成');
     
+    // 綁定業態大類選擇事件
+    const categorySelect = document.getElementById('businessCategory');
+    if (categorySelect) {
+        categorySelect.addEventListener('change', updateBusinessTypes);
+        console.log('業態大類選擇事件已綁定');
+    } else {
+        console.error('找不到 businessCategory 元素');
+    }
+    
     const revenueInput = document.getElementById('revenue');
     const marginInput = document.getElementById('grossMargin');
     
