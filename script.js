@@ -626,4 +626,96 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-});
+});// 業
+態分類對應表
+const businessCategories = {
+    food_service: [
+        { value: 'restaurant', text: '小吃/便當/熱炒/火鍋/燒肉等堂食餐廳' },
+        { value: 'beverage_chain', text: '手搖飲/咖啡/甜點/早午餐品牌（2-5門市型）' },
+        { value: 'catering_service', text: '外燴/餐盒/中央廚房型小團隊' }
+    ],
+    retail_ecommerce: [
+        { value: 'fashion_ecommerce', text: '服飾/鞋包/飾品買手型公司（電商+直播）' },
+        { value: 'retail_chain', text: '實體零售門市小連鎖（3C配件/手機維修/保健食品/藥妝）' },
+        { value: 'ecommerce_brand', text: '自有品牌電商（蝦皮/MOMO/官網DTC）' }
+    ],
+    beauty_health: [
+        { value: 'beauty_fitness', text: '美容美體/醫美門診/健身教室/運動教練工作室' }
+    ],
+    education: [
+        { value: 'education_training', text: '企業內訓/補教/才藝教室/技職訓練中心' }
+    ],
+    real_estate: [
+        { value: 'real_estate', text: '仲介/代管（不動產仲介/包租代管/社宅代管）' }
+    ],
+    automotive: [
+        { value: 'auto_service', text: '汽機車保修與鈑噴/定檢保養' },
+        { value: 'auto_parts', text: '汽機車零件批發/維修體系零件供應商' }
+    ],
+    engineering: [
+        { value: 'electrical_engineering', text: '水電工程行/弱電監控佈線團隊' },
+        { value: 'interior_design', text: '室內裝修/系統櫥櫃/木作/設計統包公司' },
+        { value: 'construction', text: '小型營造/土木包商' },
+        { value: 'green_energy', text: '太陽能/節能設備/淨零相關施工小團隊' },
+        { value: 'facility_maintenance', text: '廠房機電維護團隊（長約維修保養）' }
+    ],
+    design_marketing: [
+        { value: 'design_marketing', text: '平面設計/品牌設計/行銷代營運公司' }
+    ],
+    technology: [
+        { value: 'it_consulting', text: '網站/系統整合/軟體客製/AI顧問小型公司' }
+    ],
+    manufacturing: [
+        { value: 'metal_manufacturing', text: '金屬加工/機械零配件工廠' },
+        { value: 'plastic_manufacturing', text: '塑膠射出/包裝/印刷加工廠' },
+        { value: 'food_oem', text: '食品代工/醬料代工/烘焙代工工作室' },
+        { value: 'cosmetic_oem', text: '美妝/清潔用品OEM/ODM小工廠' },
+        { value: 'gift_manufacturing', text: '客製化禮贈品/廣告贈品工廠' }
+    ],
+    outsourcing: [
+        { value: 'outsourcing_service', text: '清潔外包/派遣/安管（保全/清潔/臨時工派遣）' }
+    ],
+    logistics: [
+        { value: 'logistics', text: '物流/快遞/倉儲代管/外送車隊' }
+    ],
+    trading: [
+        { value: 'supply_chain', text: '原物料/零組件供應商（B2B供應）' },
+        { value: 'import_export', text: '進出口貿易公司（代理國外品牌）' },
+        { value: 'product_agency', text: '食品/保健品/化妝品代理商' }
+    ],
+    tourism: [
+        { value: 'hospitality', text: '民宿/旅宿/包棟/露營園區經營團隊' },
+        { value: 'tourism', text: '在地觀光體驗/旅遊小包團公司' }
+    ]
+};
+
+// 更新業態細項選單
+function updateBusinessTypes() {
+    const categorySelect = document.getElementById('businessCategory');
+    const typeSelect = document.getElementById('businessType');
+    const selectedCategory = categorySelect.value;
+    
+    // 清空細項選單
+    typeSelect.innerHTML = '';
+    
+    if (!selectedCategory) {
+        typeSelect.disabled = true;
+        typeSelect.innerHTML = '<option value="">請先選擇業態大類</option>';
+        return;
+    }
+    
+    // 啟用細項選單
+    typeSelect.disabled = false;
+    typeSelect.innerHTML = '<option value="">請選擇具體業態</option>';
+    
+    // 加入對應的細項選項
+    const businessTypes = businessCategories[selectedCategory];
+    if (businessTypes) {
+        businessTypes.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type.value;
+            option.textContent = type.text;
+            typeSelect.appendChild(option);
+        });
+    }
+}

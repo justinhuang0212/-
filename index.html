@@ -20,81 +20,30 @@
                 </div>
                 
                 <div class="input-group">
-                    <label for="businessType">業態：</label>
-                    <select id="businessType">
-                        <option value="">請選擇業態</option>
-                        
-                        <optgroup label="🍽️ 餐飲服務類">
-                            <option value="restaurant">小吃/便當/熱炒/火鍋/燒肉等堂食餐廳</option>
-                            <option value="beverage_chain">手搖飲/咖啡/甜點/早午餐品牌（2-5門市型）</option>
-                            <option value="catering_service">外燴/餐盒/中央廚房型小團隊</option>
-                        </optgroup>
-                        
-                        <optgroup label="🛒 零售電商類">
-                            <option value="fashion_ecommerce">服飾/鞋包/飾品買手型公司（電商+直播）</option>
-                            <option value="retail_chain">實體零售門市小連鎖（3C配件/手機維修/保健食品/藥妝）</option>
-                            <option value="ecommerce_brand">自有品牌電商（蝦皮/MOMO/官網DTC）</option>
-                        </optgroup>
-                        
-                        <optgroup label="💄 美容健康類">
-                            <option value="beauty_fitness">美容美體/醫美門診/健身教室/運動教練工作室</option>
-                        </optgroup>
-                        
-                        <optgroup label="📚 教育培訓類">
-                            <option value="education_training">企業內訓/補教/才藝教室/技職訓練中心</option>
-                        </optgroup>
-                        
-                        <optgroup label="🏠 房地產服務類">
-                            <option value="real_estate">仲介/代管（不動產仲介/包租代管/社宅代管）</option>
-                        </optgroup>
-                        
-                        <optgroup label="🚗 汽車服務類">
-                            <option value="auto_service">汽機車保修與鈑噴/定檢保養</option>
-                            <option value="auto_parts">汽機車零件批發/維修體系零件供應商</option>
-                        </optgroup>
-                        
-                        <optgroup label="🔧 工程建設類">
-                            <option value="electrical_engineering">水電工程行/弱電監控佈線團隊</option>
-                            <option value="interior_design">室內裝修/系統櫥櫃/木作/設計統包公司</option>
-                            <option value="construction">小型營造/土木包商</option>
-                            <option value="green_energy">太陽能/節能設備/淨零相關施工小團隊</option>
-                            <option value="facility_maintenance">廠房機電維護團隊（長約維修保養）</option>
-                        </optgroup>
-                        
-                        <optgroup label="🎨 設計行銷類">
-                            <option value="design_marketing">平面設計/品牌設計/行銷代營運公司</option>
-                        </optgroup>
-                        
-                        <optgroup label="💻 科技資訊類">
-                            <option value="it_consulting">網站/系統整合/軟體客製/AI顧問小型公司</option>
-                        </optgroup>
-                        
-                        <optgroup label="🏭 製造加工類">
-                            <option value="metal_manufacturing">金屬加工/機械零配件工廠</option>
-                            <option value="plastic_manufacturing">塑膠射出/包裝/印刷加工廠</option>
-                            <option value="food_oem">食品代工/醬料代工/烘焙代工工作室</option>
-                            <option value="cosmetic_oem">美妝/清潔用品OEM/ODM小工廠</option>
-                            <option value="gift_manufacturing">客製化禮贈品/廣告贈品工廠</option>
-                        </optgroup>
-                        
-                        <optgroup label="🤝 服務外包類">
-                            <option value="outsourcing_service">清潔外包/派遣/安管（保全/清潔/臨時工派遣）</option>
-                        </optgroup>
-                        
-                        <optgroup label="🚚 物流運輸類">
-                            <option value="logistics">物流/快遞/倉儲代管/外送車隊</option>
-                        </optgroup>
-                        
-                        <optgroup label="📦 貿易供應類">
-                            <option value="supply_chain">原物料/零組件供應商（B2B供應）</option>
-                            <option value="import_export">進出口貿易公司（代理國外品牌）</option>
-                            <option value="product_agency">食品/保健品/化妝品代理商</option>
-                        </optgroup>
-                        
-                        <optgroup label="🏖️ 觀光旅遊類">
-                            <option value="hospitality">民宿/旅宿/包棟/露營園區經營團隊</option>
-                            <option value="tourism">在地觀光體驗/旅遊小包團公司</option>
-                        </optgroup>
+                    <label for="businessCategory">業態大類：</label>
+                    <select id="businessCategory" onchange="updateBusinessTypes()">
+                        <option value="">請先選擇業態大類</option>
+                        <option value="food_service">🍽️ 餐飲服務類</option>
+                        <option value="retail_ecommerce">🛒 零售電商類</option>
+                        <option value="beauty_health">💄 美容健康類</option>
+                        <option value="education">📚 教育培訓類</option>
+                        <option value="real_estate">🏠 房地產服務類</option>
+                        <option value="automotive">🚗 汽車服務類</option>
+                        <option value="engineering">🔧 工程建設類</option>
+                        <option value="design_marketing">🎨 設計行銷類</option>
+                        <option value="technology">💻 科技資訊類</option>
+                        <option value="manufacturing">🏭 製造加工類</option>
+                        <option value="outsourcing">🤝 服務外包類</option>
+                        <option value="logistics">🚚 物流運輸類</option>
+                        <option value="trading">📦 貿易供應類</option>
+                        <option value="tourism">🏖️ 觀光旅遊類</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="businessType">具體業態：</label>
+                    <select id="businessType" disabled>
+                        <option value="">請先選擇業態大類</option>
                     </select>
                 </div>
                 
