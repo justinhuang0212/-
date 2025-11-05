@@ -112,8 +112,9 @@ function updateBusinessTypes() {
         });
         console.log('已加入', businessTypes.length, '個選項');
     }
-}// 台灣
-中小企業行業配置（30個常見行業分類）
+}
+
+// 台灣中小企業行業配置（30個常見行業分類）
 const industryConfig = {
     // 餐飲服務類
     restaurant: {
