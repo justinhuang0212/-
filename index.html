@@ -4,16 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>中小企業人事成本計算器</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="enterprise-calculator.css">
 </head>
 <body>
     <div class="container">
         <h1>中小企業人事成本計算器</h1>
         
-        <div class="calculator">
-            <div class="line-notice">
-                此工具專為 Line 官方帳號好友提供，請確保您已加入我們的 Line 好友
+        <!-- Line 登入區域 -->
+        <div id="lineLoginSection" class="line-login-section">
+            <div class="login-card">
+                <h2>🔐 請先登入 Line 帳號</h2>
+                <p>此工具專為 Line 官方帳號好友提供</p>
+                <p>請使用您的 Line 帳號登入以繼續使用</p>
+                
+                <div class="login-buttons">
+                    <button id="lineLoginBtn" class="line-login-btn">
+                        <img src="https://developers.line.biz/assets/img/line-login-btn.png" alt="Line Login" style="width: 100%; max-width: 200px;">
+                    </button>
+                </div>
+                
+                <div class="login-info">
+                    <p><small>📱 登入後即可使用免費的 AI 薪資計算器</small></p>
+                    <p><small>🔒 我們重視您的隱私，僅用於身份驗證</small></p>
+                </div>
             </div>
+        </div>
+        
+        <!-- 計算器主體（登入後顯示） -->
+        <div class="calculator" id="calculatorSection" style="display: none;">
             
             <div class="company-info">
                 <h2>聯絡人資料</h2>
@@ -149,8 +167,22 @@
 
             </div>
         </div>
+        
+        <!-- 用戶資訊顯示區 -->
+        <div id="userInfo" class="user-info" style="display: none;">
+            <div class="user-card">
+                <img id="userAvatar" src="" alt="用戶頭像" class="user-avatar">
+                <div class="user-details">
+                    <h3 id="userName">用戶名稱</h3>
+                    <p id="userStatus">Line 帳號已驗證 ✅</p>
+                </div>
+                <button id="logoutBtn" class="logout-btn">登出</button>
+            </div>
+        </div>
     </div>
     
+    <!-- Line SDK -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

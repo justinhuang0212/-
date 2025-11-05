@@ -3,11 +3,15 @@ const CONFIG = {
     CHATGPT_API_KEY: 'YOUR_API_KEY_HERE',
     API_MODEL: 'gpt-3.5-turbo',
     MAX_TOKENS: 1500,
-    TEMPERATURE: 0.7
+    TEMPERATURE: 0.7,
+    // Line Login 設定（需要替換為實際的 LIFF ID）
+    LIFF_ID: 'YOUR_LIFF_ID_HERE'
 };
 
 // 全域變數
 let calculationData = null;
+let lineUser = null;
+let isLineLoggedIn = false;
 
 // 業態分類對應表
 const businessCategories = {
@@ -318,7 +322,7 @@ function calculateHRCosts() {
     
     console.log('計算結果：', calculationData);
     
-    displayResults(grossProfit, totalHRCost, config.hrRatio, departments, config.name);
+    displayResults(grossProfit, totalHRCost, config.hrRatio, departments);
     generateAIRecommendations();
 }
 
@@ -340,7 +344,7 @@ function calculateDepartments(config, monthlyHRCost) {
     return departments;
 }
 
-function displayResults(grossProfit, totalHRCost, hrRatio, departments, industryName) {
+function displayResults(grossProfit, totalHRCost, hrRatio, departments) {
     console.log('顯示結果');
     
     document.getElementById('grossProfit').textContent = 'NT$ ' + grossProfit.toLocaleString();
@@ -410,15 +414,129 @@ function displayBasicRecommendations() {
     document.getElementById('ai-recommendations-content').innerHTML = recommendations;
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM 載入完成');
+// Line Login 相關函數
+async function initializeLiff() {
+    try {
+        console.log('初始化 LIFF...');
+        
+        // 如果沒有設定 LIFF ID，使用模擬模式
+        if (CONFIG.LIFF_ID === 'YOUR_LIFF_ID_HERE') {
+            console.log('使用模擬 Line 登入模式');
+            showMockLineLogin();
+            return;
+        }
+        
+        await liff.init({ liffId: CONFIG.LIFF_ID });
+        
+        if (liff.isLoggedIn()) {
+            console.log('用戶已登入');
+            const profile = await liff.getProfile();
+            handleLineLogin(profile);
+        } else {
+            console.log('用戶未登入，顯示登入按鈕');
+            showLineLoginSection();
+        }
+    } catch (error) {
+        console.error('LIFF 初始化失敗:', error);
+        showMockLineLogin();
+    }
+}
+
+function showMockLineLogin() {
+    // 模擬 Line 登入（開發測試用）
+    document.getElementById('lineLoginSection').style.display = 'block';
+    document.getElementById('calculatorSection').style.display = 'none';
+    
+    document.getElementById('lineLoginBtn').addEventListener('click', function() {
+        // 模擬登入成功
+        const mockProfile = {
+            userId: 'mock_user_123',
+            displayName: '測試用戶',
+            pictureUrl: 'https://via.placeholder.com/100x100/00C300/FFFFFF?text=LINE'
+        };
+        handleLineLogin(mockProfile);
+    });
+}
+
+function showLineLoginSection() {
+    document.getElementById('lineLoginSection').style.display = 'block';
+    document.getElementById('calculatorSection').style.display = 'none';
+    
+    document.getElementById('lineLoginBtn').addEventListener('click', function() {
+        if (typeof liff !== 'undefined') {
+            liff.login();
+        } else {
+            alert('Line 登入服務暫時無法使用，請稍後再試');
+        }
+    });
+}
+
+function handleLineLogin(profile) {
+    console.log('Line 登入成功:', profile);
+    
+    lineUser = profile;
+    isLineLoggedIn = true;
+    
+    // 隱藏登入區域，顯示計算器
+    document.getElementById('lineLoginSection').style.display = 'none';
+    document.getElementById('calculatorSection').style.display = 'block';
+    
+    // 顯示用戶資訊
+    showUserInfo(profile);
+    
+    // 初始化計算器功能
+    initializeCalculator();
+}
+
+function showUserInfo(profile) {
+    const userInfo = document.getElementById('userInfo');
+    const userAvatar = document.getElementById('userAvatar');
+    const userName = document.getElementById('userName');
+    
+    userAvatar.src = profile.pictureUrl || 'https://via.placeholder.com/40x40/00C300/FFFFFF?text=U';
+    userName.textContent = profile.displayName || '用戶';
+    
+    userInfo.style.display = 'block';
+    
+    // 登出按鈕事件
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        handleLogout();
+    });
+}
+
+function handleLogout() {
+    if (typeof liff !== 'undefined' && liff.isLoggedIn()) {
+        liff.logout();
+    }
+    
+    // 重置狀態
+    lineUser = null;
+    isLineLoggedIn = false;
+    calculationData = null;
+    
+    // 重置界面
+    document.getElementById('userInfo').style.display = 'none';
+    document.getElementById('calculatorSection').style.display = 'none';
+    document.getElementById('lineLoginSection').style.display = 'block';
+    document.getElementById('results').style.display = 'none';
+    
+    // 清空表單
+    document.querySelectorAll('input, select').forEach(element => {
+        if (element.type !== 'button') {
+            element.value = '';
+        }
+    });
+    
+    console.log('用戶已登出');
+}
+
+function initializeCalculator() {
+    console.log('初始化計算器功能');
     
     const categorySelect = document.getElementById('businessCategory');
     if (categorySelect) {
         categorySelect.addEventListener('change', updateBusinessTypes);
         console.log('業態大類選擇事件已綁定');
-    } else {
-        console.error('找不到 businessCategory 元素');
     }
     
     const revenueInput = document.getElementById('revenue');
@@ -444,4 +562,116 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+}
+
+// 修改計算函數，加入 Line 用戶資訊
+function calculateHRCosts() {
+    if (!isLineLoggedIn) {
+        alert('請先登入 Line 帳號');
+        return;
+    }
+    
+    console.log('calculateHRCosts 函數被呼叫');
+    
+    // 獲取所有輸入值
+    const contactName = document.getElementById('contactName').value.trim();
+    const contactPhone = document.getElementById('contactPhone').value.trim();
+    const companyName = document.getElementById('companyName').value.trim();
+    const businessType = document.getElementById('businessType').value;
+    const revenue = parseFloat(document.getElementById('revenue').value) || 0;
+    const grossMargin = parseFloat(document.getElementById('grossMargin').value) || 0;
+    const employeeCount = parseInt(document.getElementById('employeeCount').value) || 0;
+    
+    console.log('輸入值：', { contactName, contactPhone, companyName, businessType, revenue, grossMargin, employeeCount });
+    
+    // 驗證必填欄位
+    if (!contactName) {
+        alert('請輸入聯絡人姓名');
+        document.getElementById('contactName').focus();
+        return;
+    }
+    
+    if (!contactPhone) {
+        alert('請輸入聯絡電話');
+        document.getElementById('contactPhone').focus();
+        return;
+    }
+    
+    // 驗證電話號碼格式（台灣手機或市話）
+    const phoneRegex = /^(09\d{8}|0[2-8]\d{7,8})$/;
+    if (!phoneRegex.test(contactPhone.replace(/[-\s]/g, ''))) {
+        alert('請輸入正確的電話號碼格式');
+        document.getElementById('contactPhone').focus();
+        return;
+    }
+    
+    if (!companyName) {
+        alert('請輸入公司名稱');
+        document.getElementById('companyName').focus();
+        return;
+    }
+    
+    if (!businessType) {
+        alert('請選擇業態');
+        return;
+    }
+    
+    if (revenue <= 0) {
+        alert('請輸入年營業額');
+        document.getElementById('revenue').focus();
+        return;
+    }
+    
+    if (grossMargin <= 0 || grossMargin > 100) {
+        alert('請輸入正確的毛利率（1-100%）');
+        document.getElementById('grossMargin').focus();
+        return;
+    }
+    
+    if (employeeCount <= 0) {
+        alert('請輸入員工人數');
+        document.getElementById('employeeCount').focus();
+        return;
+    }
+    
+    const grossProfit = revenue * 10000 * (grossMargin / 100);
+    const config = industryConfig[businessType];
+    
+    if (!config) {
+        alert('找不到對應的行業配置');
+        return;
+    }
+    
+    const totalHRCost = grossProfit * config.hrRatio;
+    const monthlyHRCost = totalHRCost / 12;
+    
+    const departments = calculateDepartments(config, monthlyHRCost);
+    
+    calculationData = {
+        lineUser: lineUser,
+        contactName,
+        contactPhone,
+        companyName,
+        businessType: config.name,
+        revenue,
+        grossMargin,
+        employeeCount,
+        grossProfit,
+        totalHRCost,
+        departments,
+        hrRatio: config.hrRatio,
+        timestamp: new Date().toISOString()
+    };
+    
+    console.log('計算結果：', calculationData);
+    
+    displayResults(grossProfit, totalHRCost, config.hrRatio, departments, config.name);
+    generateAIRecommendations();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM 載入完成');
+    
+    // 初始化 Line Login
+    initializeLiff();
 });
