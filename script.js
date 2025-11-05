@@ -419,13 +419,18 @@ async function initializeLiff() {
     try {
         console.log('初始化 LIFF...');
         console.log('LIFF ID:', CONFIG.LIFF_ID);
+        console.log('當前網址:', window.location.href);
         
         await liff.init({ liffId: CONFIG.LIFF_ID });
         console.log('LIFF 初始化成功');
+        console.log('LIFF 版本:', liff.getVersion());
+        console.log('是否在 Line 應用程式中:', liff.isInClient());
+        console.log('是否已登入:', liff.isLoggedIn());
         
         if (liff.isLoggedIn()) {
             console.log('用戶已登入');
             const profile = await liff.getProfile();
+            console.log('用戶資料:', profile);
             handleLineLogin(profile);
         } else {
             console.log('用戶未登入，顯示登入按鈕');
@@ -433,7 +438,11 @@ async function initializeLiff() {
         }
     } catch (error) {
         console.error('LIFF 初始化失敗:', error);
-        // 如果 LIFF 初始化失敗，顯示錯誤訊息
+        console.error('錯誤詳情:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
+        });
         showLiffError(error);
     }
 }
@@ -475,27 +484,77 @@ function showLineLoginSection() {
 function showLiffError(error) {
     console.error('LIFF 錯誤:', error);
     
+    let errorMessage = error.message;
+    let troubleshootingTips = '';
+    
+    // 根據錯誤類型提供具體建議
+    if (error.message.includes('INVALID_CONFIG')) {
+        troubleshootingTips = `
+            <div style="margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 5px;">
+                <strong>可能的解決方案：</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>檢查 LIFF ID 是否正確</li>
+                    <li>確認 Endpoint URL 設定為：<br><code>https://justinhuang0212.github.io/-/</code></li>
+                    <li>確認 App types 包含 "Web app"</li>
+                </ul>
+            </div>
+        `;
+    } else if (error.message.includes('FORBIDDEN')) {
+        troubleshootingTips = `
+            <div style="margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 5px;">
+                <strong>權限問題：</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>檢查 LIFF 應用程式的權限設定</li>
+                    <li>確認包含 PROFILE 和 OPENID_CONNECT 權限</li>
+                </ul>
+            </div>
+        `;
+    }
+    
     // 更新登入卡片顯示錯誤訊息
     const loginCard = document.querySelector('.login-card');
     if (loginCard) {
         loginCard.innerHTML = `
-            <h2>⚠️ 服務暫時無法使用</h2>
-            <p>Line 登入服務發生錯誤，請稍後再試。</p>
-            <p><small>錯誤訊息：${error.message}</small></p>
-            <button onclick="location.reload()" style="
-                background: #00C300; 
-                color: white; 
-                border: none; 
-                padding: 12px 24px; 
-                border-radius: 8px; 
-                cursor: pointer;
-                margin-top: 20px;
-            ">重新載入</button>
+            <h2>⚠️ Line 登入設定問題</h2>
+            <p>LIFF 初始化失敗，請檢查設定。</p>
+            <p><small><strong>錯誤訊息：</strong>${errorMessage}</small></p>
+            ${troubleshootingTips}
+            <div style="margin-top: 20px;">
+                <button onclick="location.reload()" style="
+                    background: #00C300; 
+                    color: white; 
+                    border: none; 
+                    padding: 12px 24px; 
+                    border-radius: 8px; 
+                    cursor: pointer;
+                    margin-right: 10px;
+                ">重新載入</button>
+                <button onclick="showMockLogin()" style="
+                    background: #6c757d; 
+                    color: white; 
+                    border: none; 
+                    padding: 12px 24px; 
+                    border-radius: 8px; 
+                    cursor: pointer;
+                ">測試模式</button>
+            </div>
         `;
     }
     
     document.getElementById('lineLoginSection').style.display = 'block';
     document.getElementById('calculatorSection').style.display = 'none';
+}
+
+// 測試模式（當 LIFF 無法使用時）
+function showMockLogin() {
+    const mockProfile = {
+        userId: 'test_user_' + Date.now(),
+        displayName: '測試用戶',
+        pictureUrl: 'https://via.placeholder.com/100x100/00C300/FFFFFF?text=TEST'
+    };
+    
+    console.log('使用測試模式登入');
+    handleLineLogin(mockProfile);
 }
 
 function handleLineLogin(profile) {
